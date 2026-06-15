@@ -11,6 +11,8 @@ Running a single-node k3s cluster inside an unprivileged LXC container on Proxmo
 - **Homepage** migrated from Docker (CT 103) to a Kubernetes Deployment
 - **Uptime Kuma** migrated from Docker (CT 103) to a Kubernetes StatefulSet with persistent storage
 - Internal DNS entries in AdGuard pointing `*.lab` to `192.168.18.39`
+- **Homepage Kubernetes widget** — reads live pod/deployment status from the k3s API via ClusterRole + in-cluster auth
+- **Docker socket proxy** (`tecnativa/docker-socket-proxy`) on CT 103 — exposes Docker API over TCP so Homepage in k3s can still show CT 103 container statuses
 
 ---
 
@@ -156,6 +158,76 @@ uptime-kuma   data-uptime-kuma-0   Bound    500Mi      local-path
 - **StatefulSet vs Deployment**: Use StatefulSet when the app depends on stable storage identity (Uptime Kuma loses its database on Deployment restarts). Deployments are stateless by design.
 - **Traefik is production-ready out of the box** with k3s — the IngressClass is pre-configured, no extra RBAC setup needed.
 - **`local-path` provisioner** is sufficient for a single-node homelab. PVCs are provisioned automatically from node-local storage.
+
+---
+
+## Homepage Kubernetes integration
+
+Since Homepage runs inside the cluster, it uses in-cluster auth automatically — no kubeconfig file needed. The only requirement is a ClusterRole with read permissions bound to Homepage's ServiceAccount.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "services", "endpoints", "namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "replicasets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+```
+
+In `kubernetes.yaml`:
+```yaml
+mode: cluster
+```
+
+In `services.yaml`, use `pod-selector` (not `app`) — Homepage maps `app:` to the label `app.kubernetes.io/name=`, which doesn't match pods created with the simpler `app=` label:
+
+```yaml
+- Kubernetes (CT 104):
+    - Uptime Kuma:
+        namespace: uptime-kuma
+        pod-selector: app=uptime-kuma   # explicit selector, not app: uptime-kuma
+```
+
+**Lesson learned:** `app: value` in Homepage services.yaml resolves to `app.kubernetes.io/name=value`. If your pods use the plain `app=value` label (which is common for manually written manifests), you must use `pod-selector` instead.
+
+## Docker socket proxy (CT 103 → CT 104)
+
+Homepage in k3s can't access CT 103's Docker socket directly. Solution: run `tecnativa/docker-socket-proxy` in CT 103, exposing a read-only Docker API over TCP.
+
+```yaml
+# In CT 103 docker-compose.yml
+socket-proxy:
+  image: tecnativa/docker-socket-proxy:latest
+  ports:
+    - '192.168.18.29:2375:2375'
+  environment:
+    - CONTAINERS=1
+    - INFO=1
+    - EVENTS=1
+    - POST=0      # read-only
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+```
+
+```yaml
+# In Homepage docker.yaml (k3s config PVC)
+my-server:
+  host: 192.168.18.29
+  port: 2375
+```
+
+**Note:** Remove `ping:` entries from Homepage services when running inside k3s — ICMP is blocked from pod network to LAN hosts.
 
 ---
 
