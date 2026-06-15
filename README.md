@@ -55,7 +55,7 @@ Personal homelab running on a repurposed MacBook Pro — managed with Proxmox, a
 | [Phase 1 — LXC Migration](phases/phase-1-lxc-migration/) | Replaced VMs with LXC containers, Docker on CT 103 | ✅ Done |
 | [Phase 2 — Services Stack](phases/phase-2-services-stack/) | Full self-hosted stack on CT 103 | ✅ Done |
 | [Phase 3 — k3s](phases/phase-3-k3s/) | Single-node k3s on CT 104, Traefik ingress, real workloads | ✅ Done |
-| Phase 4 — IaC | Terraform + Ansible over existing stack | ⏳ Planned |
+| [Phase 4 — IaC](phases/phase-4-iac/) | Terraform (bpg/proxmox) + Ansible, 4 CTs in state | ✅ Done |
 | Phase 5 — Observability | Prometheus + Grafana + Loki | ⏳ Planned |
 
 ---
