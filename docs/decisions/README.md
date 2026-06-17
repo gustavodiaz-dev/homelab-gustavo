@@ -10,3 +10,4 @@ Short records of the non-obvious technical decisions made while building this ho
 | [0004](0004-commit-the-ansible-inventory.md) | Commit the Ansible inventory instead of gitignoring it | Accepted |
 | [0005](0005-secrets-as-transient-files-in-ci.md) | Materialize host secrets as transient files in CI, not as repo files | Accepted |
 | [0006](0006-grafana-native-alerting-over-alertmanager.md) | Grafana native alerting instead of a separate Alertmanager | Accepted |
+| [0007](0007-apply-destroy-discipline-for-aws-lab.md) | Apply/destroy discipline for the AWS lab environment, no always-on infrastructure | Accepted |
