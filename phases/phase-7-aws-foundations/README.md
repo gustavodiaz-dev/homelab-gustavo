@@ -78,4 +78,4 @@ El resto del proyecto tiene `apply` automático vía `workflow_dispatch` para Pr
 - [x] Instancia EC2 t3.micro (Amazon Linux 2023)
 - [x] AWS Budget con alertas al 80%/100%
 - [x] Permisos IAM acotados (`ec2:*` solo en `us-east-1`, `budgets:*`) en vez de admin
-- [ ] Primer ciclo real apply → estudio → destroy, verificado en consola
+- [x] Primer ciclo real apply → destroy, verificado: SSH funcionando, salida a internet confirmada, sin recursos huérfanos al cerrar (instancia `terminated`, VPC eliminada)
