@@ -57,6 +57,7 @@ Personal homelab running on a repurposed MacBook Pro — managed with Proxmox, a
 | [Phase 3 — k3s](phases/phase-3-k3s/) | Single-node k3s on CT 104, Traefik ingress, real workloads | ✅ Done |
 | [Phase 4 — IaC](phases/phase-4-iac/) | Terraform (bpg/proxmox) + Ansible, 4 CTs in state | ✅ Done |
 | [Phase 5 — Observability](phases/phase-5-observability/) | Prometheus + Grafana + Loki + Promtail en k3s | ✅ Done |
+| [Phase 6 — CI/CD](phases/phase-6-cicd/) | GitHub Actions + self-hosted runner (CT105), apply/deploy automatizado | ✅ Done |
 | [Phase 7 — AWS Foundations](phases/phase-7-aws-foundations/) | VPC + EC2 + Budget en AWS, base de CLF/SAA | ✅ Done |
 
 ---
