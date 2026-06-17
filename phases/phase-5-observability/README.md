@@ -39,6 +39,8 @@ Visibilidad completa del homelab: métricas de hosts, containers, Proxmox y work
 | Promtail | grafana/promtail | monitoring | Recolecta logs de todos los pods → Loki |
 | node-exporter | Docker (CT103) | — | Métricas del host CT103 |
 | pve-exporter | Docker (CT103) | — | Métricas de Proxmox via API token |
+| Grafana unified alerting | nativo (chart grafana) | monitoring | Evalúa reglas, dispara webhook a n8n |
+| n8n workflow `[Homelab] Alertas Grafana → Telegram` | n8n (CT103) | — | Recibe el webhook, formatea y envía a Telegram |
 
 ## Acceso
 
@@ -122,6 +124,9 @@ Instalar pip en Proxmox ensucia el sistema base del hipervisor. Correrlo como Do
 ### ¿Por qué no kube-prometheus-stack?
 El chart all-in-one instala Alertmanager + muchas reglas de alerta por defecto que consumirían ~800MB RAM. Las alertas ya las manejamos via n8n + Telegram. Prometheus + Grafana por separado es más liviano y controlable.
 
+### ¿Por qué alerting nativo de Grafana en vez de Alertmanager o ntfy?
+Grafana ya trae unified alerting (evaluación de reglas + contact points + políticas de notificación) sin necesitar el componente Alertmanager aparte, evitando el costo de RAM mencionado arriba. Para el canal de notificación se consideró ntfy, pero no está instalado en el homelab y hubiera sido una herramienta nueva para resolver algo que el patrón n8n + Telegram ya cubre en el resto de los servicios. El contact point de Grafana es un webhook simple apuntando al n8n existente (`http://192.168.18.29:5678/webhook/grafana-alert`), que reenvía a Telegram. Tres reglas cubren los blind spots reales: instancia caída (`up == 0`, 5 min), disco `/` bajo 15% libre (15 min) y memoria sobre 90% de uso (10 min).
+
 ## Estado
 
 - [x] CT104: RAM aumentada a 3072MB (Terraform)
@@ -132,6 +137,6 @@ El chart all-in-one instala Alertmanager + muchas reglas de alerta por defecto q
 - [x] node-exporter: CT103 host metrics
 - [x] pve-exporter: Proxmox metrics via API token
 - [x] DNS: grafana.lab en AdGuard
-- [ ] Alertas en Grafana (email/webhook) — pendiente
-- [ ] cAdvisor en CT103 para métricas de Docker containers
+- [x] Alertas en Grafana (webhook → n8n → Telegram): InstanceDown, HighDiskUsage, HighMemoryUsage
+- [x] cAdvisor en CT103 para métricas de Docker containers
 - [ ] Dashboards custom para n8n y Vaultwarden
