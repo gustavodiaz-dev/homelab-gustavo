@@ -70,6 +70,12 @@ Homelab automation runs on n8n (self-hosted at `gdn8n.duckdns.org`):
 
 ---
 
+## Architecture Decisions
+
+Non-obvious technical decisions, with context and trade-offs, in [`docs/decisions/`](docs/decisions/).
+
+---
+
 ## License
 
 MIT
